@@ -7,8 +7,13 @@
     unique-opened
     router
     :default-active="defaultActive"
+    :collapse="!$store.getters.slideType"
   >
-    <el-sub-menu :index="menu.id + ''" v-for="(menu, index) in menusList" :key="menu.id">
+    <el-sub-menu
+      :index="menu.id + ''"
+      v-for="(menu, index) in menusList"
+      :key="menu.id"
+    >
       <template #title>
         <el-icon>
           <component :is="iconList[index]"></component>
@@ -22,11 +27,11 @@
         @click="savePath(subMenu.path)"
       >
         <template #title>
-        <el-icon>
-          <component :is="icon[iii]"></component>
-        </el-icon>
-        <span>{{ subMenu.authName }}</span>
-      </template>
+          <el-icon>
+            <component :is="icon[iii]"></component>
+          </el-icon>
+          <span>{{ $t(`menus.${subMenu.path}`) }}</span>
+        </template>
       </el-menu-item>
     </el-sub-menu>
   </el-menu>

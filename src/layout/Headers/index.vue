@@ -1,8 +1,24 @@
 <template>
-  <div class="navbar"></div>
+  <div class="navbar">
+    <Hamburger />
+    <Breadcrumb />
+    <div class="navbar-right">
+      <Driver class="navbar-item"/>
+      <Screenfull class="navbar-item" />
+      <Lang class="navbar-item" />
+      <Avatar class="navbar-item" />
+    </div>
+  </div>
 </template>
 
-<script setup></script>
+<script setup>
+import Hamburger from '@/components/Hamburger'
+import Breadcrumb from '@/components/Breadcrumb'
+import Avatar from '@/components/Avatar'
+import Lang from '@/components/Lang'
+import Screenfull from '@/components/Screenfull'
+import Driver from '@/components/Driver'
+</script>
 
 <style lang="scss" scoped>
 .navbar {

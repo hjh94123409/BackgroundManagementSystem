@@ -3,7 +3,10 @@
     <el-aside :width="asideWidth" class="sidebar-container">
       <Menu />
     </el-aside>
-    <el-container class="container">
+    <el-container
+      class="container"
+      :class="{ hidderContainer: !$store.getters.slideType }"
+    >
       <el-header>
         <Headers />
       </el-header>
@@ -18,8 +21,15 @@
 import Menu from './Menu'
 import Headers from './Headers'
 import variables from '@/styles/variables.module.scss'
-import { ref } from '@vue/reactivity'
-const asideWidth = ref(variables.sideBarWidth)
+import { computed } from '@vue/reactivity'
+import { useStore } from 'vuex'
+// const asideWidth = ref(variables.sideBarWidth)
+const store = useStore()
+const asideWidth = computed(() => {
+  return store.getters.slideType
+    ? variables.sideBarWidth
+    : variables.hideSideBarWidth
+})
 </script>
 
 <style lang="scss" scoped>
