@@ -11,7 +11,7 @@
       <el-button type="primary" :icon="Search" @click="initGetUsersList">
         {{ $t('table.search') }}
       </el-button>
-      <el-button type="primary" @click="handleDialogValue">
+      <el-button type="primary" @click="handleDialogValue()">
         {{ $t('table.adduser') }}
       </el-button>
     </el-row>
@@ -29,10 +29,22 @@
         <template v-slot="{ row }" v-else-if="item.prop === 'create_time'">
           {{ $filters.filterTimes(row.create_time) }}
         </template>
-        <template #default v-else-if="item.prop === 'action'">
-          <el-button type="primary" size="small" :icon="Edit"> </el-button>
+        <template #default="{ row }" v-else-if="item.prop === 'action'">
+          <el-button
+            type="primary"
+            size="small"
+            :icon="Edit"
+            @click="handleDialogValue(row)"
+          >
+          </el-button>
           <el-button type="warning" size="small" :icon="Setting"> </el-button>
-          <el-button type="danger" size="small" :icon="Delete"> </el-button>
+          <el-button
+            type="danger"
+            size="small"
+            :icon="Delete"
+            @click="delUser(row)"
+          >
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -40,27 +52,31 @@
       v-model:currentPage="queryForm.pagenum"
       v-model:page-size="queryForm.pagesize"
       :page-sizes="[2, 5, 10, 15]"
-      :small="small"
-      :disabled="disabled"
-      :background="background"
       layout="total, sizes, prev, pager, next, jumper"
       :total="total"
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
     />
   </el-card>
-  <Dialog />
+  <Dialog
+    v-model="dialogVisible"
+    :dialogTitle="dialogTitle"
+    v-if="dialogVisible"
+    @initUserList="initGetUsersList"
+    :dialogTableValue="dialogTableValue"
+  />
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { Search, Edit, Setting, Delete } from '@element-plus/icons-vue'
-import { getUser, changeUserState } from '@/api/users'
+import { getUser, changeUserState, deleteUser } from '@/api/users'
 import { options } from './options'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 // import i18n from '@/i18n'
 import { useI18n } from 'vue-i18n'
 import Dialog from '@/components/Dialog'
+import { isNull } from '@/utils/filters'
 
 const i18n = useI18n()
 
@@ -74,6 +90,10 @@ const total = ref(0)
 const tableData = ref([])
 
 const dialogVisible = ref(false)
+
+const dialogTitle = ref('')
+
+const dialogTableValue = ref({})
 
 const initGetUsersList = async () => {
   const res = await getUser(queryForm.value)
@@ -101,8 +121,37 @@ const changeState = async (info) => {
   })
 }
 
-const handleDialogValue = () => {
+const handleDialogValue = (row) => {
+  if (isNull(row)) {
+    dialogTitle.value = '添加用户'
+    dialogTableValue.value = {}
+  } else {
+    dialogTitle.value = '编辑用户'
+    dialogTableValue.value = JSON.parse(JSON.stringify(row))
+  }
   dialogVisible.value = true
+}
+
+const delUser = (row) => {
+  ElMessageBox.confirm(i18n.t('dialog.deleteTitle'), 'Warning', {
+    confirmButtonText: 'OK',
+    cancelButtonText: 'Cancel',
+    type: 'warning'
+  })
+    .then(async () => {
+      await deleteUser(row.id)
+      ElMessage({
+        type: 'success',
+        message: 'Delete completed'
+      })
+      initGetUsersList()
+    })
+    .catch(() => {
+      ElMessage({
+        type: 'info',
+        message: 'Delete canceled'
+      })
+    })
 }
 </script>
 
@@ -110,5 +159,12 @@ const handleDialogValue = () => {
 .header {
   padding-bottom: 16px;
   box-sizing: border-box;
+}
+::v-deep .el-pagination {
+  padding-top: 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
 }
 </style>
